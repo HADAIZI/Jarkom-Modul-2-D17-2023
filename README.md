@@ -10,7 +10,7 @@
 ## Topologi
   ![Alt text](image.png)
 
-## Config
+## Network Configs for Each Nodes
 
   - **Pandudewanata**
   ```
@@ -104,12 +104,12 @@
     gateway 10.30.3.1
  ```
 
- - **Di Pandudewanata**
+ - **Pandudewanata's .bashrc**
  ```
  iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE -s 10.30.0.0/16
  ```
 
- - **Di Lainnya**
+ - **Other's .bashrc**
  ```
  echo nameserver 192.168.122.1 > /etc/resolv.conf
  ```
@@ -126,59 +126,56 @@
  ## Soal 2
  > Buatlah website utama dengan akses ke arjuna.yyy.com dengan alias www.arjuna.yyy.com dengan yyy merupakan kode kelompok.
  
+ ### Solusi
 
- ### Script
- **Masuk ke DNS Yudhistira**
+ Untuk melakukan pembuatan website utama dengan nama domain arjuna.yyy.com, berikut adalah tahapan-tahapan yang kami kerjakan.
 
-    ```
-    apt-get update
-    apt-get install bind9 -y
-    ```
+ * Masuk ke node Yudhistira (*DNS Master*), lalu install bind-9 dengan cara berikut
 
-    ```
-    nano /etc/bind/named.conf.local
-    zone "arjuna.d17.com" {
-    type master;
-    file "/etc/bind/jarkom/arjuna.d17.com"
-    };
-    
-    mkdir /etc/bind/jarkom
-    
-    cp /etc/bind/db.local /etc/bind/jarkom/arjuna.d17.com
-    
-    nano /etc/bind/jarkom/arjuna.d17.com
-    
-    ;
-    ; BIND data file for local loopback interface
-    ;
-    $TTL	604800
-    @   	IN      SOA 	arjuna.d17.com. root.arjuna.d17.com. (
-                        2022100601     	; Serial
-                            604800     	; Refresh
-                            86400     	; Retry
-                            2419200     	; Expire
-                            604800 )   	; Negative Cache TTL
-    ;
-    @   	IN      NS  	arjuna.d17.com.
-    @   	IN      A   	10.30.2.2
-    www 	IN      CNAME   arjuna.d17.com.
-    @   	IN      AAAA	::1
-    
-    
-    service bind9 restart
+ ```
+ apt-get update
+ apt-get install bind9 -y
+ ```
 
-    ```
+ * Modifikasi file ``named.conf.local`` pada directory ``/etc/bind/named.conf.local``, dengan isi sebagaimana berikut
 
- **Masuk Client Nakula dan Sadewa**
-```
-nano /etc/resolv.conf
+ ```
+ zone "arjuna.d17.com" {
+        type master;
+        file "/etc/bind/jarkom/arjuna.d17.com";
+ };
+ ```
+
+ * Buat folder baru pada directory ``/etc/bind/`` dengan nama ``jarkom``, kemudian copy file ``db.local`` pada directory ``/etc/bind/`` ke dalam   folder baru yang telah dibuat, dengan nama ``arjuna.d17.com``. Lalu, modifikasi file tersebut sebagaimana berikut.
+
+ ```
+ ;
+ ; BIND data file for local loopback interface
+ ;
+ $TTL    604800
+ @       IN      SOA     arjuna.d17.com. root.arjuna.d17.com. (
+                      2022100601         ; Serial
+                          604800         ; Refresh
+                           86400         ; Retry
+                         2419200         ; Expire
+                          604800 )       ; Negative Cache TTL
+ ;
+ @       IN      NS      arjuna.d17.com.
+ @       IN      A       10.30.3.5       ; IP Node Arjuna
+ www     IN      CNAME   arjuna.d17.com.
+ @       IN      AAAA    ::1
+ ```
  
-nameserver 10.30.2.2 # IP Yudhistira
- 
-ping arjuna.d17.com
+ * Lakukan testing website yang telah dibuat dengan cara masuk ke salah satu client (Nakula/Sadewa), pastikan nameserver pada client sudah menuju ke Yudhistira, lalu lakukan ping ke website tersebut.
 
-```
+ ```
+ ping arjuna.d17.com
+ ping www.arjuna.d17.com
+ ```
+
 ### Result
+
+![Alt text](image-1.png)
 
 ## Soal 3
 > Dengan cara yang sama seperti soal nomor 2, buatlah website utama dengan akses ke abimanyu.yyy.com dan alias www.abimanyu.yyy.com.
