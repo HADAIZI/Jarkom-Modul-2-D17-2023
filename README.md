@@ -175,7 +175,7 @@
 
 ### Result
 
-![Alt text](image-1.png)
+![Alt text](./answer-proof/image-1.png)
 
 ## Soal 3
 > Dengan cara yang sama seperti soal nomor 2, buatlah website utama dengan akses ke abimanyu.yyy.com dan alias www.abimanyu.yyy.com.
