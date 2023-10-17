@@ -227,147 +227,229 @@ ping www.abimanyu.d17.com
 ## Soal 4 
 > Kemudian, karena terdapat beberapa web yang harus di-deploy, buatlah subdomain parikesit.abimanyu.yyy.com yang diatur DNS-nya di Yudhistira dan mengarah ke Abimanyu.
 
-### Script
-**Masuk Yudhistira**
+### Solusi
+
+Untuk membuat subdomain ``parikesit.abimanyu.d17.com``, kita perlu melakukan hal berikut
+
+* modifikasi file ``/etc/bind/jarkom/abimanyu.d17.com`` menjadi sebagaimana berikut.
+
 ```
-nano /etc/bind/jarkom/abimanyu.d17.com
- 
 ;
 ; BIND data file for local loopback interface
 ;
-$TTL	604800
-@   	IN      SOA 	abimanyu.d17.com. root.abimanyu.d17.com. (
-                 	2022100601     	; Serial
-                     	604800     	; Refresh
-                      	86400     	; Retry
-                    	2419200     	; Expire
-                     	604800 )   	; Negative Cache TTL
+$TTL    604800
+@       IN      SOA     abimanyu.d17.com. root.abimanyu.d17.com. (
+                     2022100601         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
 ;
-@   	IN      NS  	abimanyu.d17.com.
-@   	IN      A   	10.30.2.2   	; IP Yudhistira
-www 	IN      CNAME   abimanyu.d17.com.
-parikesit IN	A   	10.30.3.3   	; IP Abimanyu
-@   	IN      AAAA	::1
- 
-service bind9 restart
-
+@       IN      NS      abimanyu.d17.com.
+@       IN      A       10.30.3.3       ; IP Abimanyu
+www     IN      CNAME   abimanyu.d17.com.
+parikesit IN    A       10.30.3.3       ; IP Abimanyu
+@       IN      AAAA    ::1
 ```
 
-**Masuk ke Nakula Sadewa**
+* Setelah itu lakukan testing pada salah satu client dengan cara berikut
+
 ```
-ping parikesit.abimanyu.d17.com -c 5
+ping parikesit.abimanyu.d17.com
 ```
+
 ### Result
+
+![Alt text](./answer-proof/image-3.png)
 
 ## Soal 5
 > Buat juga reverse domain untuk domain abimanyu
  
-### Script
-**Masuk Yudhistira**
-```
-nano /etc/bind/named.conf.local
+### Solusi
 
-zone "2.30.10.in-addr.arpa" {
-	type master;
-	file "/etc/bind/jarkom/2.30.10.in-addr.arpa";
+Untuk membuat reverse domain untuk domain abimanyu, maka kita perlu melakukan tahapan berikut.
+
+* Pada node Yudhistira, modifikasi file ``/etc/bind/named.conf.local`` dengan cara menambahkan beberapa baris code berikut.
+
+```
+echo '
+zone "3.30.10.in-addr.arpa" {
+    type master;
+    file "/etc/bind/jarkom/3.30.10.in-addr.arpa";
 };
- 
-cp /etc/bind/db.local /etc/bind/jarkom/2.30.10.in-addr.arpa
- 
-nano /etc/bind/jarkom/2.30.10.in-addr.arpa
- 
+' >> /etc/bind/named.conf.local
+```
+
+* Kemudian, copy file dari ``/etc/bind/db.local`` menuju ``/etc/bind/jarkom/3.30.10.in-addr.arpa``. Setelah itu, modifikasi file ``3.30.10.in-addr.arpa`` sebagaimana berikut.
+
+```
 ;
 ; BIND data file for local loopback interface
 ;
-$TTL	604800
-@   	IN      SOA 	abimanyu.d17.com. root.abimanyu.d17.com. (
-                 	2022100601     	; Serial
-                     	604800     	; Refresh
-                      	86400     	; Retry
-                    	2419200     	; Expire
-                     	604800 )   	; Negative Cache TTL
+$TTL    604800
+@       IN      SOA     abimanyu.d17.com. root.abimanyu.d17.com. (
+                     2022100601         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
 ;
-2.30.10.in-addr.arpa.   IN      NS  	abimanyu.d17.com.
-2                   	IN  	PTR     abimanyu.d17.com.  ; Byte ke-4 Yudhis
- 
-service bind9 restart
+3.30.10.in-addr.arpa.   IN      NS      abimanyu.d17.com.
+3                       IN      PTR     abimanyu.d17.com.  ; Byte ke-4 Abimanyu
+```
+
+* Jika sudah, lakukan testing pada client dengan melakukan command berikut.
 
 ```
+host -t PTR 10.30.3.3
+```
+
+### Result
+
+![Alt text](./answer-proof/image-4.png)
 
 ## Soal 6
 > Agar dapat tetap dihubungi ketika DNS Server Yudhistira bermasalah, buat juga Werkudara sebagai DNS Slave untuk domain utama.
 
-### Script
-**Masuk Yudhistira**
-```
-nano /etc/bind/named.conf.local
- 
-zone "arjuna.d17.com" {
-    	type master;
-    	notify yes;
-    	also-notify { 10.30.2.3; }; // IP werkudara slave
-    	allow-transfer { 10.30.2.3; }; // IP werkudara slave
-    	file "/etc/bind/jarkom/arjuna.d17.com";
-};
- 
-zone "abimanyu.d17.com" {
-    	type master;
-    	notify yes;
-    	also-notify { 10.30.2.3; }; // IP werkudara slave
-    	allow-transfer { 10.30.2.3; }; // IP werkudara slave
-    	file "/etc/bind/jarkom/abimanyu.d17.com";
-};
- 
-zone "2.30.10.in-addr.arpa" {
-	type master;
-	file "/etc/bind/jarkom/2.30.10.in-addr.arpa";
-};
- 
-service bind9 restart
+Untuk membuat node Werkudara menjadi *DNS Slave* dari node Yudhistira, perlu dilakukan tahapan berikut
+
+* Pada node Yudhistira, masuk ke file ``/etc/bind/named.conf.local``, dan edit zone arjuna dan abimanyu menjadi sebagaimana berikut.
 
 ```
-**Masuk Wekudara**
+zone "arjuna.d17.com" {
+        type master;
+        notify yes;
+        also-notify { 10.30.2.3; }; // IP werkudara slave
+        allow-transfer { 10.30.2.3; }; // IP werkudara slave
+        file "/etc/bind/jarkom/arjuna.d17.com";
+};
+
+zone "abimanyu.d17.com" {
+        type master;
+        notify yes;
+        also-notify { 10.30.2.3; }; // IP werkudara slave
+        allow-transfer { 10.30.2.3; }; // IP werkudara slave
+        file "/etc/bind/jarkom/abimanyu.d17.com";
+};
+
+zone "3.30.10.in-addr.arpa" {
+    type master;
+    file "/etc/bind/jarkom/3.30.10.in-addr.arpa";
+};
+```
+
+* Masuk ke node Werkudara, dan install bind9 terlebih dahulu dengan cara berikut.
+
 ```
 apt-get update
 apt-get install bind9 -y
- 
-nano /etc/bind/named.conf.local
-zone "arjuna.d17.com" {
-	type slave;
-	masters { 10.30.2.2; };
-	file "/var/lib/bind/arjuna.d17.com";
-};
- 
-zone "abimanyu.d17.com" {
-	type slave;
-	masters { 10.30.2.2; };
-	file "/var/lib/bind/abimanyu.d17.com";
-};
- 
-service bind9 restart
+```
+
+* Setelah itu, masuk file ``/etc/bind/named.conf.local`` dan modifikasi agar terlihat seperti ini.
 
 ```
-**Testing**
-Pada Yudhistira
+zone "arjuna.d17.com" {
+    type slave;
+    masters { 10.30.2.2; }; 
+    file "/var/lib/bind/arjuna.d17.com";
+};
+
+zone "abimanyu.d17.com" {
+    type slave;
+    masters { 10.30.2.2; }; 
+    file "/var/lib/bind/abimanyu.d17.com";
+};
+```
+
+* Lakukan testing dengan cara, matikan bind9 pada yudhis dengan cara
+
 ```
 service bind9 stop
 ```
 
-Pada Nakula
-```
-add nameserver Werkudara dibawah Yudhistira
-
-```
-
-Coba ping
+* Lalu, pada Nakula, tambah nameserver yang merujuk ke IP dari Werkudara. Lakukan ping ke arjuna dan abimanyu, harusnya masih bisa.
 
 ### Result
+
+![Alt text](./answer-proof/image-5.png)
+
 
 ## Soal 7 dan 8
 
 > 7. Seperti yang kita tahu karena banyak sekali informasi yang harus diterima, buatlah subdomain khusus untuk perang yaitu baratayuda.abimanyu.yyy.com dengan alias www.baratayuda.abimanyu.yyy.com yang didelegasikan dari Yudhistira ke Werkudara dengan IP menuju ke Abimanyu dalam folder Baratayuda.
 
 > 8. Untuk informasi yang lebih spesifik mengenai Ranjapan Baratayuda, buatlah subdomain melalui Werkudara dengan akses rjp.baratayuda.abimanyu.yyy.com dengan alias www.rjp.baratayuda.abimanyu.yyy.com yang mengarah ke Abimanyu.
+
+Untuk melakukan pembuatan subdomain ``baratayuda.abimanyu.d17.com`` dengan alias ``www``. Kita perlu melakukan tahapan berikut
+
+* Masuk ke node Yudhistira, dan modifikasi file ``/etc/bind/jarkom/abimanyu.d17.com`` menjadi sebagaimana berikut.
+
+```
+;
+; BIND data file for local loopback interface
+;
+$TTL    604800
+@       IN      SOA     abimanyu.d17.com. root.abimanyu.d17.com. (
+                    2022100601          ; Serial
+                        604800          ; Refresh
+                        86400           ; Retry
+                        2419200         ; Expire
+                        604800 )        ; Negative Cache TTL
+;
+@       IN      NS      abimanyu.d17.com.
+@       IN      A       10.30.3.3       ; IP Abimanyu
+www     IN      CNAME   abimanyu.d17.com.
+parikesit IN    A       10.30.3.3       ; IP Abimanyu
+www.parikesit   IN      CNAME   parikesit
+ns1     IN      A       10.30.2.3       ; IP Werkudara
+baratayuda IN   NS      ns1
+@       IN      AAAA    ::1
+```
+
+Perlu diingat bahwa baratayuda dideklarasikan dari Yudhistira ke Werkudara, sehingga IP pada ns1 merujuk ke IP Werkudara.
+
+* Setelah itu, kita akan memodifikasi file ``/etc/bind/named.conf.options`` menjadi berikut.
+
+```
+options {
+        directory "/var/cache/bind";
+
+        allow-query{any;};
+        auth-nxdomain no;       # conform to RFC1035
+        listen-on-v6 { any; };
+};
+```
+
+* Berpindah ke Node Werkudara, modifikasi file ``/etc/bind/named.conf.options`` sama seperti di node Yudhistira di tahap sebelumnya.
+
+* Kemudian, kita akan menambah zone untuk subdomain baratayuda kedalam file ``/etc/bind/named.conf.options``.
+
+```
+zone "baratayuda.abimanyu.d17.com" {
+        type master;
+        file "/etc/bind/baratayuda/baratayuda.abimanyu.d17.com";
+};
+```
+
+*  Buat folder baru didalam ``/etc/bind`` dengan nama ``baratayuda``, lalu copy file ``etc/bind/db.local`` menuju ``/etc/bind/baratayuda/baratayuda.abimanyu.d17.com``
+
+```
+;
+; BIND data file for local loopback interface
+;
+$TTL    604800
+@       IN      SOA     baratayuda.abimanyu.d17.com. root.baratayuda.abimanyu.d$                   2022100601      ; Serial
+                        604800          ; Refresh
+                        86400           ; Retry
+                        2419200         ; Expire
+                        604800 )        ; Negative Cache TTL
+;
+@       IN      NS      baratayuda.abimanyu.d17.com.
+@       IN      A       10.30.3.3
+rjp     IN      A       10.30.3.3
+www     IN      CNAME   baratayuda.abimanyu.d17.com.
+www.rjp IN      CNAME   rjp
+```
 
 ### Script
 **Masuk Yudhistira**
