@@ -438,341 +438,95 @@ zone "baratayuda.abimanyu.d17.com" {
 ; BIND data file for local loopback interface
 ;
 $TTL    604800
-@       IN      SOA     baratayuda.abimanyu.d17.com. root.baratayuda.abimanyu.d$                   2022100601      ; Serial
-                        604800          ; Refresh
-                        86400           ; Retry
-                        2419200         ; Expire
-                        604800 )        ; Negative Cache TTL
-;
-@       IN      NS      baratayuda.abimanyu.d17.com.
-@       IN      A       10.30.3.3
-rjp     IN      A       10.30.3.3
-www     IN      CNAME   baratayuda.abimanyu.d17.com.
-www.rjp IN      CNAME   rjp
-```
-
-### Script
-**Masuk Yudhistira**
-
-```
-nano /etc/bind/jarkom/abimanyu.d17.com
- 
-;
-; BIND data file for local loopback interface
-;
-$TTL    604800
-@       IN      SOA     abimanyu.d17.com. root.abimanyu.d17.com. (
+@       IN      SOA     baratayuda.abimanyu.d17.com. root.baratayuda.abimanyu.d17.com. (          
                     2022100601          ; Serial
                         604800          ; Refresh
                         86400           ; Retry
                         2419200         ; Expire
                         604800 )        ; Negative Cache TTL
 ;
-@       IN      NS      abimanyu.d17.com.
-@       IN      A       10.30.3.3       ; IP Abimanyu
-www     IN      CNAME   abimanyu.d17.com.
-parikesit IN    A       10.30.3.3       ; IP Abimanyu
-ns1     IN      A       10.30.2.3       ; IP Werkudara
-baratayuda IN   NS      ns1
-@       IN      AAAA    ::1
-
- 
-nano /etc/bind/named.conf.options
- 
-options {
-    	directory "/var/cache/bind";
-
-    	allow-query{any;};
-    	auth-nxdomain no;	# conform to RFC1035
-    	listen-on-v6 { any; };
-};
- 
-service bind9 restart
-
-```
-
-**Masuk Werkudara**
-```
-nano /etc/bind/named.conf.options
-```
-``` 
- 
-options {
-    	directory "/var/cache/bind";
- 
-    	allow-query{any;};
-    	auth-nxdomain no;	# conform to RFC1035
-    	listen-on-v6 { any; };
-};
-```
-```
-nano /etc/bind/named.conf.local
-``` 
-
-```
-zone "arjuna.d17.com" {
-	type slave;
-	masters { 10.30.2.2; };
-	file "/var/lib/bind/arjuna.d17.com";
-};
- 
-zone "abimanyu.d17.com" {
-	type slave;
-	masters { 10.30.2.2; };
-	file "/var/lib/bind/abimanyu.d17.com";
-};
- 
-zone "baratayuda.abimanyu.d17.com" {
-	type master;
-	file "/etc/bind/baratayuda/baratayuda.abimanyu.d17.com";
-};
-```
-
-
-```
-mkdir /etc/bind/baratayuda
-cp /etc/bind/db.local /etc/bind/baratayuda/baratayuda.abimanyu.d17.com
- 
-nano /etc/bind/baratayuda/baratayuda.abimanyu.d17.com
-``` 
-
-```
-;
-; BIND data file for local loopback interface
-;
-$TTL    604800
-@       IN      SOA     baratayuda.abimanyu.d17.com. root.baratayuda.abimanyu.d17.com. (
-                        2022100601      ; Serial
-                        604800          ; Refresh
-                        86400           ; Retry
-                        2419200         ; Expire
-                        604800 )        ; Negative Cache TTL
-;
 @       IN      NS      baratayuda.abimanyu.d17.com.
 @       IN      A       10.30.3.3
 rjp     IN      A       10.30.3.3
 www     IN      CNAME   baratayuda.abimanyu.d17.com.
 www.rjp IN      CNAME   rjp
+```
+
+* Lakukan testing pada client dengan cara berikut
 
 ```
-```
-service bind9 restart
+ping baratayuda.abimanyu.d17.com
+ping www.baratayuda.abimanyu.d17.com
+ping rjp.baratayuda.abimanyu.d17.com
+ping www.rjp.baratayuda.abimanyu.d17.com
 ```
 
 ### Result
 
-## Soal 9 10 11
+![Alt text](./answer-proof/image-6.png)
+
+## Soal 9 
 > 9. Arjuna merupakan suatu Load Balancer Nginx dengan tiga worker (yang juga menggunakan nginx sebagai webserver) yaitu Prabakusuma, Abimanyu, dan Wisanggeni. Lakukan deployment pada masing-masing worker.
-> 10. Kemudian gunakan algoritma Round Robin untuk Load Balancer pada Arjuna. Gunakan server_name pada soal nomor 1. Untuk melakukan pengecekan akses alamat web tersebut kemudian pastikan worker yang digunakan untuk menangani permintaan akan berganti ganti secara acak. Untuk webserver di masing-masing worker wajib berjalan di port 8001-8003. Contoh
-   > - Prabakusuma:8001
-   > - Abimanyu:8002
-   > - Wisanggeni:8003
-> 11. Selain menggunakan Nginx, lakukan konfigurasi Apache Web Server pada worker Abimanyu dengan web server www.abimanyu.yyy.com. Pertama dibutuhkan web server dengan DocumentRoot pada /var/www/abimanyu.yyy
 
-### Script
+Untuk melakukan deployment domain ``arjuna.d17.com`` pada masing-masing worker, perlu dilakukan tahapan berikut
 
-**Masuk ke Prabukusuma**
+* Masuk ke worker Prabukusuma, install web server nginx, php-fpm, wget, dan juga unzip dengan cara berikut
 
 ```
 apt-get update
 apt-get install nginx -y
 apt-get install php php-fpm -y
- 
-mkdir /var/www/jarkom
- 
 apt-get install wget -y
 apt-get install unzip -y
- 
-wget -O /var/www/jarkom/arjuna.yyy.com.zip "https://drive.google.com/u/0/uc?id=17tAM_XDKYWDvF-JJix1x7txvTBEax7vX&export=download"
- 
-unzip -d /var/www/jarkom /var/www/jarkom/arjuna.yyy.com.zip && rm /var/www/jarkom/arjuna.yyy.com.zip
- 
-mv /var/www/jarkom/arjuna.yyy.com/index.php /var/www/jarkom
- 
-rm -r /var/www/jarkom/arjuna.yyy.com
- 
-echo '
-server {
- 
-    	listen 8001;
- 
-    	root /var/www/jarkom;
- 
-    	index index.php index.html index.htm;
-    	server_name arjuna.d17.com;
- 
-    	location / {
-                    	try_files $uri $uri/ /index.php?$query_string;
-    	}
- 
-    	# pass PHP scripts to FastCGI server
-    	location ~ \.php$ {
-    	include snippets/fastcgi-php.conf;
-    	fastcgi_pass unix:/var/run/php/php7.0-fpm.sock;
-    	}
- 
-    	location ~ /\.ht {
-                    	deny all;
-    	}
- 
-    	error_log /var/log/nginx/jarkom_error.log;
-    	access_log /var/log/nginx/jarkom_access.log;
-}
-' > /etc/nginx/sites-available/jarkom
- 
-ln -s /etc/nginx/sites-available/jarkom /etc/nginx/sites-enabled
- 
-rm -rf /etc/nginx/sites-enabled/default
- 
-service nginx restart
-service php7.0-fpm start
-service php7.0-fpm restart
-
 ```
 
-**Masuk ke Abimanyu**
-
+* Buat directory dengan nama ``jarkom`` pada directory ``/var/www``, kemudian download ``arjuna.yyy.com.zip`` dari link google drive pada soal. Unzip file tersebut dan hapus zipnya, lalu pindah file index.php yang ada didalam directory ``arjuna.yyy.com`` ke directory yang dibuat diawal yaitu ``/var/www/jarkom``, diakhiri dengan  dihapusnya directory arjuna.yyy.com. Berikut adalah kode-kode yang perlu dijalankan.
 ```
-apt-get update
-apt-get install nginx -y
-apt-get install php php-fpm -y
- 
 mkdir /var/www/jarkom
- 
-apt-get install wget -y
-apt-get install unzip -y
- 
-# Serve arjuna.d17.com
 
-wget -O /var/www/jarkom/arjuna.yyy.com.zip "https://drive.google.com/u/0/uc?id=17tAM_XDKYWDvF-JJix1x7txvTBEax7vX&export=download"
- 
-unzip -d /var/www/jarkom /var/www/jarkom/arjuna.yyy.com.zip && rm /var/www/jarkom/arjuna.yyy.com.zip
- 
+wget -O /var/www/jarkom/arjuna.yyy.com.zip "https://drive.google.com/u/0/ucid=17tAM_XDKYWDvF-JJix1x7txvTBEax7vX&export=download"
+
+unzip -d /var/www/jarkom /var/www/jarkom/arjuna.yyy.com.zip && rm /var/www/jarkom/arjuna.yyy.com.zip 
+
 mv /var/www/jarkom/arjuna.yyy.com/index.php /var/www/jarkom
- 
+
 rm -r /var/www/jarkom/arjuna.yyy.com
- 
-echo '
-server {
- 
-    	listen 8002;
- 
-    	root /var/www/jarkom;
- 
-    	index index.php index.html index.htm;
-    	server_name arjuna.d17.com;
- 
-    	location / {
-                    	try_files $uri $uri/ /index.php?$query_string;
-    	}
- 
-    	# pass PHP scripts to FastCGI server
-    	location ~ \.php$ {
-    	include snippets/fastcgi-php.conf;
-    	fastcgi_pass unix:/var/run/php/php7.0-fpm.sock;
-    	}
- 
-    	location ~ /\.ht {
-                    	deny all;
-    	}
- 
-    	error_log /var/log/nginx/jarkom_error.log;
-    	access_log /var/log/nginx/jarkom_access.log;
-}
-' > /etc/nginx/sites-available/jarkom
- 
-ln -s /etc/nginx/sites-available/jarkom /etc/nginx/sites-enabled
- 
-rm -rf /etc/nginx/sites-enabled/default
- 
-service nginx restart
-service php7.0-fpm start
-service php7.0-fpm restart
-
-# domain abimanyu.d17.com
- 
-apt-get install apache2
-service apache2 start
- 
-wget -O /var/www/abimanyu.d17/abimanyu.yyy.com.zip "https://drive.google.com/u/0/uc?id=1a4V23hwK9S7hQEDEcv9FL14UkkrHc-Zc&export=download"
-
-unzip -d /var/www/abimanyu.d17 /var/www/abimanyu.d17/abimanyu.yyy.com.zip && rm /var/www/abimanyu.d17/abimanyu.yyy.com.zip
-
-mv /var/www/abimanyu.d17/abimanyu.yyy.com/index.php /var/www/abimanyu.d17/
-
-mv /var/www/abimanyu.d17/abimanyu.yyy.com/home.html /var/www/abimanyu.d17/
-
-mv /var/www/abimanyu.d17/abimanyu.yyy.com/abimanyu.webp /var/www/abimanyu.d17/
-
-rm -r /var/www/abimanyu.d17/abimanyu.yyy.com/
-
-echo '
-<VirtualHost *:80>
-    	ServerAdmin webmaster@localhost
-    	DocumentRoot /var/www/abimanyu.d17
-	ServerName abimanyu.d17.com
-	ServerAlias www.abimanyu.d17.com
- 
-    	ErrorLog ${APACHE_LOG_DIR}/error.log
-    	CustomLog ${APACHE_LOG_DIR}/access.log combined
- 
-   </VirtualHost>
-' > /etc/apache2/sites-available/abimanyu.d17.com.conf
-
-mkdir /var/www/abimanyu.d17
-a2ensite abimanyu.d17.com
-service apache2 restart
-
 ```
 
-**Masuk Wisanggeni**
+* Selanjutnya, kita akan melakukan konfigurasi webserver nginx untuk deployment, dengan cara membuat file ``jarkom`` baru pada directory ``/etc/nginx/sites-available/``. Isi file tersebut sebagaimana berikut.
+
 ```
-apt-get update
-apt-get install nginx -y
-apt-get install php php-fpm -y
- 
-mkdir /var/www/jarkom
- 
-apt-get install wget -y
-apt-get install unzip -y
- 
-wget -O /var/www/jarkom/arjuna.yyy.com.zip "https://drive.google.com/u/0/uc?id=17tAM_XDKYWDvF-JJix1x7txvTBEax7vX&export=download"
- 
-unzip -d /var/www/jarkom /var/www/jarkom/arjuna.yyy.com.zip && rm /var/www/jarkom/arjuna.yyy.com.zip
- 
-mv /var/www/jarkom/arjuna.yyy.com/index.php /var/www/jarkom
- 
-rm -r /var/www/jarkom/arjuna.yyy.com
- 
-echo '
 server {
- 
-    	listen 8003;
- 
-    	root /var/www/jarkom;
- 
-    	index index.php index.html index.htm;
-    	server_name arjuna.d17.com;
- 
-    	location / {
-                    	try_files $uri $uri/ /index.php?$query_string;
-    	}
- 
-    	# pass PHP scripts to FastCGI server
-    	location ~ \.php$ {
-    	include snippets/fastcgi-php.conf;
-    	fastcgi_pass unix:/var/run/php/php7.0-fpm.sock;
-    	}
- 
-    	location ~ /\.ht {
-                    	deny all;
-    	}
- 
-    	error_log /var/log/nginx/jarkom_error.log;
-    	access_log /var/log/nginx/jarkom_access.log;
+
+        listen 8001;
+
+        root /var/www/jarkom;
+
+        index index.php index.html index.htm;
+        server_name arjuna.d17.com;
+
+        location / {
+                        try_files $uri $uri/ /index.php?$query_string;
+        }
+
+        # pass PHP scripts to FastCGI server
+        location ~ \.php$ {
+          include snippets/fastcgi-php.conf;
+          fastcgi_pass unix:/var/run/php/php7.0-fpm.sock;
+        }
+
+        location ~ /\.ht {
+                        deny all;
+        }
+
+        error_log /var/log/nginx/jarkom_error.log;
+        access_log /var/log/nginx/jarkom_access.log;
 }
-' > /etc/nginx/sites-available/jarkom
- 
+```
+
+* Setelah konfigurasi nginx untuk arjuna sudah selesai, kita akan membuat symlink dan restart semua service yang ada. Berikut caranya,
+
+```
 ln -s /etc/nginx/sites-available/jarkom /etc/nginx/sites-enabled
  
 rm -rf /etc/nginx/sites-enabled/default
@@ -782,14 +536,22 @@ service php7.0-fpm start
 service php7.0-fpm restart
 ```
 
-**Masuk Arjuna**
+* Dengan cara yang sama pada tahap sebelumnya, lakukan juga pada worker Abimanyu dan Wesanggeni. Satu hal yang membedakan hanyalah port listennya (berdasarkan soal 10)
+
+Port Prabukusuma -> 8001
+Port Abimanyu    -> 8002
+Port Wesanggeni  -> 8003
+
+* Sementara itu, pada Load Balancer yang perlu kita lakukan adalah menginstall nginx terlebih dahulu dengan cara
+
 ```
 apt-get update
-apt-get install nginx
- 
+apt-get install nginx -y
 service nginx start
- 
-echo '
+```
+
+* Setelah itu, kita perlu membuat file konfigurasi baru untuk worker pada directory ``/etc/nginx/sites-available/`` dengan nama file ``lb-jarkom``. Dengan isi sebagaimana berikut
+```
 # Default menggunakan Round Robin
 upstream myweb  {
     	server 10.30.3.2:8001; # IP Prabukusuma
@@ -805,10 +567,354 @@ server {
     	proxy_pass http://myweb;
     	}
 }
-' > /etc/nginx/sites-available/lb-jarkom
- 
-ln -s /etc/nginx/sites-available/lb-jarkom /etc/nginx/sites-enabled
- 
-service nginx restart
+```
 
-```#
+* Jika semua sudah dikonfigurasi, lakukan testing dengan menggunakan command lynx pada client sebagaimana berikut
+
+```
+lynx http://arjuna.d17.com
+```
+
+Worker yang melakukan *serve* seharusnya dimulai berdasarkan urutan dari round robin pada konfigurasi di arjuna, yaitu Worker Prabukusuma, Worker Abimanyu, dan Worker Wisanggeni.
+
+### Result
+
+![Alt text](./answer-proof/image-7.png)
+
+> 10. Kemudian gunakan algoritma Round Robin untuk Load Balancer pada Arjuna. Gunakan server_name pada soal nomor 1. Untuk melakukan pengecekan akses alamat web tersebut kemudian pastikan worker yang digunakan untuk menangani permintaan akan berganti ganti secara acak. Untuk webserver di masing-masing worker wajib berjalan di port 8001-8003. Contoh
+   > - Prabakusuma:8001
+   > - Abimanyu:8002
+   > - Wisanggeni:8003
+
+Karena pada tahap 9 kita sudah mengatur port listen dari masing-masing worker, kita hanya perlu melakukan testing ke masing-masing worker dengan cara memanggil ip workernya diikuti dengan portnya, sebagaimana berikut
+
+```
+lynx 10.30.3.2:8001
+lynx 10.30.3.3:8002
+lynx 10.30.3.4:8003
+```
+
+### Result
+
+![Alt text](./answer-proof/image-7.png)
+![Alt text](./answer-proof/image-8.png)
+![Alt text](./answer-proof/image-9.png)
+
+
+> 11. Selain menggunakan Nginx, lakukan konfigurasi Apache Web Server pada worker Abimanyu dengan web server www.abimanyu.yyy.com. Pertama dibutuhkan web server dengan DocumentRoot pada /var/www/abimanyu.yyy
+
+Untuk melakukan konfigurasi web server apache pada worker abimanyu, perlu dilakukan tahapan-tahapan berikut,
+
+* Install apache2 dan libapache2-mod-php7.0 dengan cara berikut
+
+```
+apt-get install apache2
+apt-get install libapache2-mod-php7.0
+service apache2 start
+```
+
+* Selanjutnya, kita akan melakukan pembuatan folder baru di ``/var/www/`` bernama ``abimanyu.d17``, nantinya folder ini akan menyimpan hasil download file terkait web server ``abimanyu.yyy.com`` melalui google drive yang diberikan di soal, unzip kontennya ke directory tadi, hapus zipnya, lalu pindahkan setiap file yang ada di folder ``abimanyu.yyy.com`` yaitu ``index.php``, ``home.html``, dan ``abimanyu.welp`` ke dalam folder yang dibuat di awal. Berikut adalah urutan commandnya,
+
+```
+mkdir /var/www/abimanyu.d17 
+ 
+wget -O /var/www/abimanyu.d17/abimanyu.yyy.com.zip "https://drive.google.com/u/0/uc?id=1a4V23hwK9S7hQEDEcv9FL14UkkrHc-Zc&export=download"
+
+unzip -d /var/www/abimanyu.d17 /var/www/abimanyu.d17/abimanyu.yyy.com.zip && rm /var/www/abimanyu.d17/abimanyu.yyy.com.zip
+
+mv /var/www/abimanyu.d17/abimanyu.yyy.com/index.php /var/www/abimanyu.d17/
+
+mv /var/www/abimanyu.d17/abimanyu.yyy.com/home.html /var/www/abimanyu.d17/
+
+mv /var/www/abimanyu.d17/abimanyu.yyy.com/abimanyu.webp /var/www/abimanyu.d17/
+
+rm -r /var/www/abimanyu.d17/abimanyu.yyy.com/
+```
+
+* Setelah itu, buat configurasi apache baru di directory ``/etc/apache2/sites-available/`` dengan nama ``abimanyu.d17.com.conf``, isi konfigurasinya sebagaimana berikut
+
+```
+<VirtualHost *:80>
+        ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/abimanyu.d17
+        ServerName abimanyu.d17.com
+        ServerAlias www.abimanyu.d17.com
+
+        <Directory /var/www/abimanyu.d17>
+                Options +FollowSymLinks -Multiviews
+                AllowOverride All
+        </Directory>
+
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+ 
+</VirtualHost>
+```
+
+* Jika sudah, lakukan deployment webserver apache dengan cara berikut
+
+```
+a2ensite abimanyu.d17.com
+```
+
+* Lakukan testing pada client dengan command lynx berikut
+
+```
+lynx www.abimanyu.d17.com
+```
+
+### Result
+
+![Alt text](./answer-proof/image-10.png)
+
+> 12. Setelah itu ubahlah agar url www.abimanyu.yyy.com/index.php/home menjadi www.abimanyu.yyy.com/home.
+
+Untuk mengubah agar pemanggilan lynx ``www.abimanyu.d17.com/home`` merujuk ke ``www.abimanyu.yyy.com/index.php/home``, perlu dilakukan tahapan berikut.
+
+* Buat sebuah file .htaccess pada directory ``/var/www/abimanyu.d17/`` dan isi sebagaimana berikut,
+
+```
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^([^\.]+)$ index.php/$1 [NC,L]
+```
+
+pastikan sudah memanggil ``a2enmod rewrite`` terlebih dahulu.
+
+* lakukan testing di client
+
+### Result
+
+![Alt text](./answer-proof/image-10.png)
+
+> 13. Selain itu, pada subdomain www.parikesit.abimanyu.yyy.com, DocumentRoot disimpan pada /var/www/parikesit.abimanyu.yyy
+
+Dengan cara yang sama seperti nomor 11, ikuti tahapan berikut untuk melakukan pembuatan subdomain webserver www.parikesit.abimanyu.d17.com
+
+* download keperluan file zip subdomain parikesit dari google drive, lalu unzip file ke directory ``/var/www``, rename folder yang ada di zip menjadi ``parikesit.abimanyu.d17``, lalu buat sebuah folder baru bernama secret dan taruh file html bebas didalamnya sebagaimana berikut.
+
+```
+wget -O /var/www/parikesit.abimanyu.d17.zip "https://drive.google.com/u/0/uc?id=1LdbYntiYVF_NVNgJis1GLCLPEGyIOreS&export=download"
+
+unzip -d /var/www /var/www/parikesit.abimanyu.d17.zip && rm /var/www/parikesit.abimanyu.d17.zip
+
+mv /var/www/parikesit.abimanyu.yyy.com /var/www/parikesit.abimanyu.d17
+
+mkdir /var/www/parikesit.abimanyu.d17/secret
+```
+
+Isi file html
+
+```
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Ini Secret</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
+    <script src='main.js'></script>
+</head>
+<body>
+    <p>ssshhhh...ini secret bang</p>
+</body>
+</html>
+```
+
+* buat file konfigurasi apache baru untuk domain parikesit di directory ``/etc/apache2/sites-available/parikesit.abimanyu.d17.com.conf``, dan isi filenya sebagaimana berikut
+
+```
+<VirtualHost *:80>
+        ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/parikesit.abimanyu.d17
+        ServerName parikesit.abimanyu.d17.com
+        ServerAlias www.parikesit.abimanyu.d17.com
+
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+```
+
+* Jika sudah, lakukan deployment domain dengan command berikut
+
+```
+a2ensite parikesit.abimanyu.d17.com
+```
+
+* lakukan testing di client dengan lynx
+
+```
+lynx www.parikesit.abimanyu.d17.com
+```
+
+### Result
+
+![Alt text](./answer-proof/image-11.png)
+
+> 14. Pada subdomain tersebut folder /public hanya dapat melakukan directory listing sedangkan pada folder /secret tidak dapat diakses (403 Forbidden).
+
+Untuk melakukan directory listing pada ``/public`` kita hanya perlu navigasi ke directory tersebut saat melakukan lynx, sehingga tidak ada yang perlu dimodifikasi pada konfig. Sementara itu, untuk melakukan ketiadaan akses untuk folder ``/secret``, tambahkan kode berikut ke dalam file ``/etc/apache2/sites-available/parikesit.abimanyu.d17.com.conf``
+
+```
+<Directory /var/www/parikesit.abimanyu.d17/secret>
+                Options -Indexes
+</Directory>
+```
+
+### Result
+
+![Alt text](./answer-proof/image-12.png)
+
+> 15. Buatlah kustomisasi halaman error pada folder /error untuk mengganti error kode pada Apache. Error kode yang perlu diganti adalah 404 Not Found dan 403 Forbidden
+
+Untuk mengganti halaman error 403 dan 404, kita hanya perlu menambahkan potongan kode berikut ke file ``/etc/apache2/sites-available/parikesit.abimanyu.d17.com.conf``
+
+```
+ErrorDocument 404 /error/404.html
+ErrorDocument 403 /error/403.html
+```
+
+### Result
+
+![Alt text](./answer-proof/image-13.png)
+
+
+> 16. Buatlah suatu konfigurasi virtual host agar file asset www.parikesit.abimanyu.yyy.com/public/js menjadi www.parikesit.abimanyu.yyy.com/js
+
+Untuk membuat pemanggilan lynx ``www.parikesit.abimanyu.d17.com/js`` merujuk ke ``www.parikesit.abimanyu.d17.com/public/js``, kita hanya perlu menambahkan potongan kode berikut ke file ``/etc/apache2/sites-available/parikesit.abimanyu.d17.com.conf``
+
+```
+Alias "/js" "/var/www/parikesit.abimanyu.d17/public/js"
+```
+
+### Result after test
+
+![Alt text](./answer-proof/image-14.png)
+
+> 17. Agar aman, buatlah konfigurasi agar www.rjp.baratayuda.abimanyu.yyy.com hanya dapat diakses melalui port 14000 dan 14400.
+
+Dengan cara yang sama seperti nomor 11, ikuti tahapan berikut untuk melakukan pembuatan subdomain webserver ``www.rjp.baratayuda.abimanyu.d17.com``
+
+* download keperluan file zip subdomain rjp.baratayuda dari google drive, lalu unzip file ke directory ``/var/www``, rename folder yang ada di zip menjadi ``rjp.baratayuda.abimanyu.d17``.
+
+```
+wget -O /var/www/rjp.baratayuda.abimanyu.d17.zip "https://drive.google.com/u/0/uc?id=1pPSP7yIR05JhSFG67RVzgkb-VcW9vQO6&export=download"
+
+unzip -d /var/www /var/www/rjp.baratayuda.abimanyu.d17.zip && rm /var/www/rjp.baratayuda.abimanyu.d17.zip
+
+mv /var/www/rjp.baratayuda.abimanyu.yyy.com /var/www/rjp.baratayuda.abimanyu.d17
+```
+
+* buat file konfigurasi apache baru untuk domain rjp.baratayuda di directory ``/etc/apache2/sites-available/rjp.baratayuda.abimanyu.d17.com.conf``, dan isi filenya sebagaimana berikut
+
+```
+<VirtualHost *:14000>
+        ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/rjp.baratayuda.abimanyu.d17
+        ServerName rjp.baratayuda.abimanyu.d17.com
+        ServerAlias www.rjp.baratayuda.abimanyu.d17.com
+
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+<VirtualHost *:14400>
+        ServerAdmin webmaster@localhost
+        DocumentRoot /var/www/rjp.baratayuda.abimanyu.d17
+        ServerName rjp.baratayuda.abimanyu.d17.com
+        ServerAlias www.rjp.baratayuda.abimanyu.d17.com
+
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+```
+
+* modifikasi file ``/etc/apache2/ports.conf`` menjadi berikut
+
+```
+Listen 80
+Listen 14000
+Listen 14400
+
+<IfModule ssl_module>
+        Listen 443
+</IfModule>
+
+<IfModule mod_gnutls.c>
+        Listen 443
+</IfModule>
+```
+* Lakukan deployment domain dengan cara 
+
+```
+a2ensite rjp.baratayuda.abimanyu.d17.com
+```
+
+* lakukan testing dengan lynx nama domain diikuti portnya
+
+### RESULT
+
+![Alt text](./answer-proof/image-15.png)
+
+> 18. Untuk mengaksesnya buatlah autentikasi username berupa “Wayang” dan password “baratayudayyy” dengan yyy merupakan kode kelompok. Letakkan DocumentRoot pada /var/www/rjp.baratayuda.abimanyu.yyy.
+
+Untuk menambah autentikasi pada domain rjp.baratayuda, kita hanya perlu melakukan pembuatan 2 file baru di directory ``/var/www/rjp.baratayuda.abimanyu.d17`` dengan nama ``.htppasswd`` dan ``.htaccess``, dengan isi masing-masing sebagaimana berikut,
+
+Isi .htpasswd
+
+```
+Wayang:$apr1$hEKgPW6z$ez8I8SzzzSlXVFPUgg67G1
+```
+
+Isi .htaccess
+
+```
+AuthType Basic
+AuthName "Authentication Required"
+AuthUserFile /var/www/rjp.baratayuda.abimanyu.d17/.htpasswd
+Require valid-user
+```
+
+Terakhir, tambahkan potongan kode berikut pada konfig domain apachenya (dikedua port)
+
+```
+<Directory /var/www/rjp.baratayuda.abimanyu.d17>
+                Options +Indexes
+                AllowOverride All
+                Require all granted
+</Directory>
+```
+
+> 19. Buatlah agar setiap kali mengakses IP dari Abimanyu akan secara otomatis dialihkan ke www.abimanyu.yyy.com (alias)
+
+kita hanya perlu menambahkan potongan kode berikut ke file ``/etc/apache2/sites-available/abimanyu.d17.com.conf``
+
+```
+ServerAlias 10.30.3.3
+```
+
+> 20. Karena website www.parikesit.abimanyu.yyy.com semakin banyak pengunjung dan banyak gambar gambar random, maka ubahlah request gambar yang memiliki substring “abimanyu” akan diarahkan menuju abimanyu.png.
+
+Untuk melakukannya, kita perlu menambah file baru di directory ``/var/www/parikesit.abimanyu.d17/public/images/`` yaitu file ``.htaccess`` dengan isi berikut
+
+```
+RewriteEngine On
+
+RewriteCond %{REQUEST_URI} /public/images/
+RewriteCond %{REQUEST_URI} (abimanyu.*\.(jpg|png)) [NC]
+RewriteRule (.*) /public/images/abimanyu.png [L,R=302]
+```
+
+Lalu, di file config domain nya tambahkan potongan kode berikut
+
+```
+<Directory /var/www/parikesit.abimanyu.d17/public/images>
+                AllowOverride All
+</Directory>
+```
+
+Lakukan testing pada client ketika mencoba enter ke gambar dengan substring abimanyu
+
+### Result
+
+![Alt text](./answer-proof/image-16.png)
