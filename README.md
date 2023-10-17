@@ -126,7 +126,7 @@
  ## Soal 2
  > Buatlah website utama dengan akses ke arjuna.yyy.com dengan alias www.arjuna.yyy.com dengan yyy merupakan kode kelompok.
  
- ### Solusi
+ ### Solution
 
  Untuk melakukan pembuatan website utama dengan nama domain arjuna.yyy.com, berikut adalah tahapan-tahapan yang kami kerjakan.
 
@@ -180,38 +180,49 @@
 ## Soal 3
 > Dengan cara yang sama seperti soal nomor 2, buatlah website utama dengan akses ke abimanyu.yyy.com dan alias www.abimanyu.yyy.com.
 
-### Scipt
-**Masuk ke Yudhistira**
+### Solution
+
+Karena cara yang dilakukan sama seperti nomor sebelumnya, maka tahapannya kurang lebih sama, yang menjadi perbedaan hanyalah isi file dari ``named.conf.local`` dan file config baru untuk domain abimanyu.yyy.com yakni ``abimanyu.d17.com``
+
+* Tambah beberapa line berikut ke dalam file ``/etc/bind/named.conf.local``
+
 ```
-nano /etc/bind/named.conf.local
 zone "abimanyu.d17.com" {
-    	type master;
-    	file "/etc/bind/jarkom/abimanyu.d17.com";
+        type master;
+        file "/etc/bind/jarkom/abimanyu.d17.com";
 };
- 
-cp /etc/bind/db.local /etc/bind/jarkom/abimanyu.d17.com
- 
-nano /etc/bind/jarkom/abimanyu.d17.com
+```
+
+* Modifikasi file ``/etc/bind/jarkom/abimanyu.d17.com/`` sebagaimana berikut,
+
+```
 ;
 ; BIND data file for local loopback interface
 ;
-$TTL	604800
-@   	IN      SOA 	abimanyu.d17.com. root.abimanyu.d17.com. (
-                 	2022100601     	; Serial
-                     	604800     	; Refresh
-                      	86400     	; Retry
-                    	2419200     	; Expire
-                     	604800 )   	; Negative Cache TTL
+$TTL    604800
+@       IN      SOA     abimanyu.d17.com. root.abimanyu.d17.com. (
+                     2022100601         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
 ;
-@   	IN      NS  	abimanyu.d17.com.
-@   	IN      A   	10.30.2.2
-@   	IN      AAAA	::1
- 
-service bind9 restart
+@       IN      NS      abimanyu.d17.com.
+@       IN      A       10.30.3.3
+www     IN      CNAME   abimanyu.d17.com.
+@       IN      AAAA    ::1
+```
+
+* Lakukan testing kembali ke salah satu client, dengan cara ping website tersebut
 
 ```
- testing ping di client (nakula dan sadewa)
+ping abimanyu.d17.com
+ping www.abimanyu.d17.com
+```
+
 ### Result
+
+![Alt text](./answer-proof/image-2.png)
 
 ## Soal 4 
 > Kemudian, karena terdapat beberapa web yang harus di-deploy, buatlah subdomain parikesit.abimanyu.yyy.com yang diatur DNS-nya di Yudhistira dan mengarah ke Abimanyu.
